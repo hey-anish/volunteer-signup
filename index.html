@@ -190,15 +190,6 @@
     .status.success { color: var(--success); }
     .status.error { color: var(--danger); }
 
-    .note {
-      background: #fff8e6;
-      border: 1px solid #f4df9a;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 14px;
-      margin-top: 14px;
-    }
-
     @media (max-width: 900px) {
       .grid { grid-template-columns: 1fr; }
       .stats { grid-template-columns: 1fr 1fr; }
@@ -213,7 +204,9 @@
   <div class="container">
     <div class="header">
       <h1>Parent Volunteer Signup</h1>
-      <p class="subtext">Parents can volunteer for upcoming events. The dashboard shows how many volunteers and kids are covered so far.</p>
+      <p class="subtext">
+        Parents can volunteer for upcoming events. The dashboard shows how many volunteers and kids are covered so far.
+      </p>
     </div>
 
     <div class="tabs">
@@ -225,11 +218,15 @@
       <div class="grid">
         <div class="card">
           <h2>Volunteer Registration</h2>
-          <p class="muted">Fill out the form below. Each submission can be stored in a Google Sheet through a Google Apps Script endpoint.</p>
+          <p class="muted">
+            Fill out the form below to volunteer for an event.
+          </p>
 
           <form id="volunteerForm">
             <label for="eventId">Event</label>
-            <select id="eventId" name="eventId" required></select>
+            <select id="eventId" name="eventId" required>
+              <option value="">Loading events...</option>
+            </select>
 
             <label for="parentName">Parent Name</label>
             <input id="parentName" name="parentName" type="text" required />
@@ -262,10 +259,6 @@
 
             <div id="formStatus" class="status"></div>
           </form>
-
-          <div class="note">
-            Replace <strong>APPS_SCRIPT_WEB_APP_URL</strong> in the code with your deployed Google Apps Script URL.
-          </div>
         </div>
 
         <div class="card">
@@ -278,19 +271,23 @@
     <section id="dashboard" class="tab-panel">
       <div class="card">
         <h2>Volunteer Matrix</h2>
+
         <div class="stats">
           <div class="stat-box">
             <div class="stat-label">Total Parent Volunteers</div>
             <div class="stat-value" id="totalParents">0</div>
           </div>
+
           <div class="stat-box">
             <div class="stat-label">Total Kids Represented</div>
             <div class="stat-value" id="totalKids">0</div>
           </div>
+
           <div class="stat-box">
             <div class="stat-label">Judge Volunteers</div>
             <div class="stat-value" id="totalJudges">0</div>
           </div>
+
           <div class="stat-box">
             <div class="stat-label">Events Covered</div>
             <div class="stat-value" id="eventsCovered">0</div>
@@ -333,13 +330,17 @@
 
     function formatDate(dateStr) {
       if (!dateStr) return '';
+
       const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      return d.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      }
+
+      return dateStr;
     }
 
     function loadEvents() {
@@ -348,7 +349,7 @@
 
       EVENTS.forEach(event => {
         const opt = document.createElement('option');
-        opt.value = event.id;
+        opt.value = String(event.id);
         opt.textContent = `${event.name} - ${formatDate(event.date)}`;
         eventSelect.appendChild(opt);
 
@@ -375,8 +376,22 @@
       return response.json();
     }
 
+    async function submitVolunteer(data) {
+      const response = await fetch(APPS_SCRIPT_WEB_APP_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(data)
+      });
+
+      return response.json();
+    }
+
     async function loadEventsFromBackend() {
       try {
+        formStatus.textContent = 'Loading events...';
+        formStatus.className = 'status';
+
         const result = await fetchEvents();
         console.log('Events API result:', result);
 
@@ -384,12 +399,21 @@
           throw new Error(result.message || 'Could not load events.');
         }
 
-        EVENTS = result.events || [];
+        EVENTS = (result.events || []).map(ev => ({
+          id: String(ev.id),
+          name: ev.name,
+          date: ev.date,
+          location: ev.location
+        }));
+
         loadEvents();
 
         if (EVENTS.length === 0) {
-          formStatus.textContent = 'No rows found in the Events sheet.';
+          formStatus.textContent = 'No events found in the Events sheet.';
           formStatus.className = 'status error';
+        } else {
+          formStatus.textContent = '';
+          formStatus.className = 'status';
         }
       } catch (err) {
         console.error('Error loading events:', err);
@@ -409,11 +433,11 @@
       (summary.events || []).forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${item.eventName}</td>
+          <td>${item.eventName || ''}</td>
           <td>${formatDate(item.eventDate)}</td>
-          <td>${item.parentCount}</td>
-          <td>${item.kidCount}</td>
-          <td>${item.judgeCount}</td>
+          <td>${item.parentCount || 0}</td>
+          <td>${item.kidCount || 0}</td>
+          <td>${item.judgeCount || 0}</td>
         `;
         summaryTableBody.appendChild(tr);
       });
@@ -428,17 +452,6 @@
       }
     }
 
-    async function submitVolunteer(data) {
-      const response = await fetch(APPS_SCRIPT_WEB_APP_URL, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(data)
-      });
-
-      return response.json();
-    }
-
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -450,11 +463,12 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       formStatus.textContent = 'Submitting...';
       formStatus.className = 'status';
 
       const formData = new FormData(form);
-      const selectedEvent = EVENTS.find(ev => ev.id === formData.get('eventId'));
+      const selectedEvent = EVENTS.find(ev => String(ev.id) === String(formData.get('eventId')));
 
       const payload = {
         eventId: formData.get('eventId'),
@@ -486,7 +500,10 @@
       }
     });
 
-    refreshBtn.addEventListener('click', loadDashboard);
+    refreshBtn.addEventListener('click', () => {
+      loadEventsFromBackend();
+      loadDashboard();
+    });
 
     loadEventsFromBackend();
     loadDashboard();
