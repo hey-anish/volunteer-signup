@@ -1,5 +1,5 @@
 const APPS_SCRIPT_WEB_APP_URL =
-"https://script.google.com/macros/s/AKfycbxWdOk3RL1XEx7S6xnLny8LwFbVn45lUS9E9LhozmUJ6qKTwE5VN6Dz92Xba5zl_7IP6Q/exec";
+"https://script.google.com/macros/s/AKfycbwOwUf7sFVVY54waAkfj0-8N_nI9Igdwkw_1Dl4mAig5Pq0MbW9kNvfLYOlzsBAPgN07w/exec";
 
 let EVENTS = [];
 
@@ -40,7 +40,11 @@ function loadEvents() {
   judgeEventSelect.innerHTML = "<option value=''>Select Event</option>";
   eventsList.innerHTML = "";
 
-  EVENTS.forEach(e => {
+  const openEvents = EVENTS.filter(e =>
+    String(e.status || "").trim().toUpperCase() === "OPEN"
+  );
+
+  openEvents.forEach(e => {
     const signupOpt = document.createElement("option");
     signupOpt.value = String(e.id);
     signupOpt.textContent = (e.name || "") + " - " + formatDate(e.date);
@@ -49,14 +53,6 @@ function loadEvents() {
     signupOpt.dataset.location = e.location || "";
     eventSelect.appendChild(signupOpt);
 
-    const judgeOpt = document.createElement("option");
-    judgeOpt.value = String(e.id);
-    judgeOpt.textContent = (e.name || "") + " - " + formatDate(e.date);
-    judgeOpt.dataset.name = e.name || "";
-    judgeOpt.dataset.date = e.date || "";
-    judgeOpt.dataset.location = e.location || "";
-    judgeEventSelect.appendChild(judgeOpt);
-
     const div = document.createElement("div");
     div.className = "event-box";
     div.innerHTML =
@@ -64,6 +60,16 @@ function loadEvents() {
       "Date: " + formatDate(e.date) + "<br>" +
       "Location: " + (e.location || "");
     eventsList.appendChild(div);
+  });
+
+  EVENTS.forEach(e => {
+    const judgeOpt = document.createElement("option");
+    judgeOpt.value = String(e.id);
+    judgeOpt.textContent = (e.name || "") + " - " + formatDate(e.date);
+    judgeOpt.dataset.name = e.name || "";
+    judgeOpt.dataset.date = e.date || "";
+    judgeOpt.dataset.location = e.location || "";
+    judgeEventSelect.appendChild(judgeOpt);
   });
 }
 
