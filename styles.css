@@ -150,3 +150,31 @@ text-align:left;
 margin-top:10px;
 font-weight:600;
 }
+.tab-btn{
+  border:1px solid var(--border);
+  padding:10px 16px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  color:white;
+}
+
+/* SIGNUP TAB (BLUE) */
+
+.tab-signup{
+  background:#3b82f6;
+}
+
+.tab-signup.active{
+  background:#1d4ed8;
+}
+
+/* MATRIX TAB (GREEN) */
+
+.tab-matrix{
+  background:#22c55e;
+}
+
+.tab-matrix.active{
+  background:#15803d;
+}
