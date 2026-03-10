@@ -367,23 +367,35 @@
     }
 
     async function loadEventsFromBackend() {
-      try {
-        if (APPS_SCRIPT_WEB_APP_URL.includes('PASTE_YOUR')) {
-          EVENTS = [
-            { id: 'event1', name: 'Speech Tournament #1', date: '2026-09-12', location: 'Riverside High School' },
-            { id: 'event2', name: 'Debate Invitational', date: '2026-10-03', location: 'Greenville, SC' },
-            { id: 'event3', name: 'Regional Qualifier', date: '2026-11-14', location: 'Greer, SC' }
-          ];
-          loadEvents();
-          return;
-        }
+  try {
+    if (APPS_SCRIPT_WEB_APP_URL.includes('PASTE_YOUR')) {
+      EVENTS = [
+        { id: 'event1', name: 'Speech Tournament #1', date: '2026-09-12', location: 'Riverside High School' },
+        { id: 'event2', name: 'Debate Invitational', date: '2026-10-03', location: 'Greenville, SC' },
+        { id: 'event3', name: 'Regional Qualifier', date: '2026-11-14', location: 'Greer, SC' }
+      ];
+      loadEvents();
+      return;
+    }
 
-        const result = await fetchEvents();
-        EVENTS = result.events || [];
-        loadEvents();
-      } catch (err) {
-        console.error(err);
-      }
+    const result = await fetchEvents();
+    console.log("Events API result:", result);
+
+    if (!result.success) {
+      throw new Error(result.message || "Could not load events.");
+    }
+
+    EVENTS = result.events || [];
+    loadEvents();
+
+    if (EVENTS.length === 0) {
+      alert("Events loaded, but no rows were found in the Events sheet.");
+    }
+  } catch (err) {
+    console.error("Error loading events:", err);
+    alert("Error loading events: " + err.message);
+  }
+}
     } - ${formatDate(event.date)}`;
         eventSelect.appendChild(opt);
 
