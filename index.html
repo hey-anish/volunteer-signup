@@ -25,6 +25,7 @@ Parents can sign up for Judging. The dashboard shows coverage so far.
 <div class="tabs">
   <button class="tab-btn tab-signup active" data-tab="signup">Signup Form</button>
   <button class="tab-btn tab-matrix" data-tab="dashboard">Volunteer Matrix</button>
+  <button class="tab-btn tab-judge" data-tab="judgeList">Judge List</button>
 </div>
 
 
@@ -137,6 +138,56 @@ Submit
 </thead>
 
 <tbody id="summaryTableBody"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- JUDGE LIST TAB -->
+
+<section id="judgeList" class="tab-panel">
+
+<div class="card">
+
+<h2>Judge List</h2>
+
+<label>Select Event</label>
+<select id="judgeEventId">
+<option value="">Select Event</option>
+</select>
+
+<div class="stats" style="margin-top:20px;">
+
+<div class="stat-box">
+<div class="stat-label">Total Volunteers</div>
+<div id="judgeTotalVolunteers" class="stat-value">0</div>
+</div>
+
+<div class="stat-box">
+<div class="stat-label">Kids Represented</div>
+<div id="judgeTotalKids" class="stat-value">0</div>
+</div>
+
+</div>
+
+<h3>Volunteer List</h3>
+
+<table>
+
+<thead>
+<tr>
+<th>Volunteer</th>
+<th>Kid Represented</th>
+<th>Role</th>
+<th>Email</th>
+<th>Phone</th>
+</tr>
+</thead>
+
+<tbody id="judgeListTableBody"></tbody>
 
 </table>
 
