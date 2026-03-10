@@ -20,34 +20,38 @@ const judgeTotalVolunteersEl = document.getElementById("judgeTotalVolunteers");
 const judgeTotalKidsEl = document.getElementById("judgeTotalKids");
 const judgeListTableBody = document.getElementById("judgeListTableBody");
 
+const redlistTotalRowsEl = document.getElementById("redlistTotalRows");
+const redlistZeroCountEl = document.getElementById("redlistZeroCount");
+const redListTableBody = document.getElementById("redListTableBody");
+
 function formatDate(d) {
   if (!d) return "";
-
   const dt = new Date(d);
   if (!isNaN(dt.getTime())) {
     return dt.toLocaleDateString();
   }
-
   return d;
 }
 
 function loadEvents() {
+  if (!eventSelect || !judgeEventSelect) return;
+
   eventSelect.innerHTML = "<option value=''>Select Event</option>";
   judgeEventSelect.innerHTML = "<option value=''>Select Event</option>";
   eventsList.innerHTML = "";
 
   EVENTS.forEach(e => {
     const signupOpt = document.createElement("option");
-    signupOpt.value = e.id;
-    signupOpt.textContent = e.name + " - " + formatDate(e.date);
+    signupOpt.value = String(e.id);
+    signupOpt.textContent = (e.name || "") + " - " + formatDate(e.date);
     signupOpt.dataset.name = e.name || "";
     signupOpt.dataset.date = e.date || "";
     signupOpt.dataset.location = e.location || "";
     eventSelect.appendChild(signupOpt);
 
     const judgeOpt = document.createElement("option");
-    judgeOpt.value = e.id;
-    judgeOpt.textContent = e.name + " - " + formatDate(e.date);
+    judgeOpt.value = String(e.id);
+    judgeOpt.textContent = (e.name || "") + " - " + formatDate(e.date);
     judgeOpt.dataset.name = e.name || "";
     judgeOpt.dataset.date = e.date || "";
     judgeOpt.dataset.location = e.location || "";
@@ -67,6 +71,10 @@ async function loadEventsFromBackend() {
   try {
     const r = await fetch(APPS_SCRIPT_WEB_APP_URL + "?action=getEvents");
     const data = await r.json();
+
+    if (!data.success) {
+      throw new Error(data.message || "Could not load events");
+    }
 
     EVENTS = data.events || [];
     loadEvents();
@@ -89,7 +97,6 @@ async function loadDashboard() {
     summaryTableBody.innerHTML = "";
 
     const rows = data.events || [];
-
     if (!rows.length) {
       summaryTableBody.innerHTML =
         "<tr><td colspan='5'>No volunteer data yet.</td></tr>";
@@ -98,14 +105,12 @@ async function loadDashboard() {
 
     rows.forEach(e => {
       const tr = document.createElement("tr");
-
       tr.innerHTML =
         "<td>" + (e.eventName || "") + "</td>" +
         "<td>" + formatDate(e.eventDate) + "</td>" +
         "<td>" + (e.parentCount || 0) + "</td>" +
         "<td>" + (e.kidCount || 0) + "</td>" +
         "<td>" + (e.judgeCount || 0) + "</td>";
-
       summaryTableBody.appendChild(tr);
     });
   } catch (err) {
@@ -136,7 +141,6 @@ async function loadJudgeList(eventId) {
     judgeListTableBody.innerHTML = "";
 
     const rows = data.rows || [];
-
     if (!rows.length) {
       judgeListTableBody.innerHTML =
         "<tr><td colspan='5'>No volunteers found for this event.</td></tr>";
@@ -145,20 +149,49 @@ async function loadJudgeList(eventId) {
 
     rows.forEach(row => {
       const tr = document.createElement("tr");
-
       tr.innerHTML =
         "<td>" + (row.parentName || "") + "</td>" +
         "<td>" + (row.kidName || "") + "</td>" +
         "<td>" + (row.volunteerRole || "") + "</td>" +
         "<td>" + (row.email || "") + "</td>" +
         "<td>" + (row.phone || "") + "</td>";
-
       judgeListTableBody.appendChild(tr);
     });
   } catch (err) {
     console.error("Error loading judge list:", err);
     judgeListTableBody.innerHTML =
       "<tr><td colspan='5'>Could not load judge list.</td></tr>";
+  }
+}
+
+async function loadRedList() {
+  try {
+    const r = await fetch(APPS_SCRIPT_WEB_APP_URL + "?action=getRedList");
+    const data = await r.json();
+
+    redlistTotalRowsEl.textContent = data.totalRows || 0;
+    redlistZeroCountEl.textContent = data.zeroEventCount || 0;
+    redListTableBody.innerHTML = "";
+
+    const rows = data.rows || [];
+    if (!rows.length) {
+      redListTableBody.innerHTML =
+        "<tr><td colspan='3'>No rows found in allvolunteers sheet.</td></tr>";
+      return;
+    }
+
+    rows.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + (row.parentName || "") + "</td>" +
+        "<td>" + (row.kidName || "") + "</td>" +
+        "<td>" + (row.eventsJudged || 0) + "</td>";
+      redListTableBody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("Error loading redlist:", err);
+    redListTableBody.innerHTML =
+      "<tr><td colspan='3'>Could not load redlist.</td></tr>";
   }
 }
 
@@ -205,6 +238,7 @@ form.addEventListener("submit", async e => {
       statusDiv.textContent = "Signup successful";
       form.reset();
       loadDashboard();
+      loadRedList();
 
       if (judgeEventSelect.value) {
         loadJudgeList(judgeEventSelect.value);
@@ -234,9 +268,14 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
       judgeListTableBody.innerHTML =
         "<tr><td colspan='5'>Select an event to view volunteers.</td></tr>";
     }
+
+    if (btn.dataset.tab === "redList") {
+      loadRedList();
+    }
   };
 });
 
 loadEventsFromBackend();
 loadDashboard();
 loadJudgeList("");
+loadRedList();
