@@ -1,5 +1,5 @@
 const APPS_SCRIPT_WEB_APP_URL =
-"https://script.google.com/macros/s/AKfycbwEfoampa17XPq_32UfZgH-Xn5slhdRVRSKZkhmLszqLYMNlWLRnHIGlChNkD60oGuo/exec";
+"https://script.google.com/macros/s/AKfycbxWdOk3RL1XEx7S6xnLny8LwFbVn45lUS9E9LhozmUJ6qKTwE5VN6Dz92Xba5zl_7IP6Q/exec";
 
 let EVENTS = [];
 
