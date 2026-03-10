@@ -61,16 +61,17 @@ function loadEvents() {
       "Location: " + (e.location || "");
     eventsList.appendChild(div);
   });
-
   EVENTS.forEach(e => {
     const judgeOpt = document.createElement("option");
     judgeOpt.value = String(e.id);
-    judgeOpt.textContent = (e.name || "") + " - " + formatDate(e.date);
+    judgeOpt.textContent =
+      (e.name || "") + " - " + formatDate(e.date) + " - " + (e.status || "");
     judgeOpt.dataset.name = e.name || "";
     judgeOpt.dataset.date = e.date || "";
     judgeOpt.dataset.location = e.location || "";
     judgeEventSelect.appendChild(judgeOpt);
   });
+ 
 }
 
 async function loadEventsFromBackend() {
