@@ -3,20 +3,23 @@
 --card:#ffffff;
 --text:#1f2937;
 
---accent:#2563eb;
---accent2:#1d4ed8;
+--blue:#3b82f6;
+--blue-dark:#1d4ed8;
 
 --green:#22c55e;
 --green-dark:#15803d;
 
+--accent:#2563eb;
+--accent2:#1d4ed8;
+
 --border:#e5e7eb;
 }
 
-/* GENERAL PAGE */
+/* PAGE */
 
 body{
 margin:0;
-font-family:Arial;
+font-family:Arial, Helvetica, sans-serif;
 background:var(--bg);
 color:var(--text);
 }
@@ -32,36 +35,35 @@ padding:24px;
 .header{
 background:linear-gradient(135deg,var(--accent),var(--accent2));
 color:white;
-padding:24px;
-border-radius:12px;
-margin-bottom:20px;
+padding:28px;
+border-radius:14px;
+margin-bottom:24px;
 }
 
 /* TABS */
 
 .tabs{
 display:flex;
-gap:10px;
-margin-bottom:20px;
+gap:14px;
+margin-bottom:24px;
 }
 
-/* Base tab button */
-
 .tab-btn{
-padding:10px 16px;
-border-radius:10px;
+padding:14px 22px;
+border-radius:14px;
 border:none;
 cursor:pointer;
-font-weight:600;
+font-weight:700;
+font-size:16px;
 color:white;
 transition:0.2s;
 margin-top:0;
 }
 
-/* SIGNUP TAB (BLUE) */
+/* SIGNUP TAB */
 
 .tab-signup{
-background:#3b82f6;
+background:var(--blue);
 }
 
 .tab-signup:hover{
@@ -69,13 +71,13 @@ background:#2563eb;
 }
 
 .tab-signup.active{
-background:#1d4ed8;
+background:var(--blue-dark);
 }
 
-/* MATRIX TAB (GREEN) */
+/* MATRIX TAB */
 
 .tab-matrix{
-background:#22c55e;
+background:var(--green);
 }
 
 .tab-matrix:hover{
@@ -83,7 +85,7 @@ background:#16a34a;
 }
 
 .tab-matrix.active{
-background:#15803d;
+background:var(--green-dark);
 }
 
 /* TAB PANELS */
@@ -96,20 +98,20 @@ display:none;
 display:block;
 }
 
-/* GRID LAYOUT */
+/* GRID */
 
 .grid{
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:20px;
+gap:22px;
 }
 
 /* CARD */
 
 .card{
-background:var(--card);
-padding:20px;
-border-radius:12px;
+background:white;
+padding:22px;
+border-radius:14px;
 border:1px solid var(--border);
 }
 
@@ -117,7 +119,7 @@ border:1px solid var(--border);
 
 label{
 display:block;
-margin-top:12px;
+margin-top:14px;
 font-weight:600;
 }
 
@@ -126,14 +128,15 @@ select,
 textarea{
 width:100%;
 padding:10px;
-margin-top:4px;
+margin-top:6px;
 border-radius:8px;
 border:1px solid var(--border);
+font-size:14px;
 }
 
-/* BUTTON */
+/* FORM BUTTON */
 
-button{
+form button{
 margin-top:16px;
 padding:12px;
 border:none;
@@ -144,7 +147,7 @@ font-weight:600;
 cursor:pointer;
 }
 
-button:hover{
+form button:hover{
 background:var(--accent2);
 }
 
@@ -153,13 +156,13 @@ background:var(--accent2);
 .stats{
 display:grid;
 grid-template-columns:repeat(2,1fr);
-gap:10px;
-margin-bottom:16px;
+gap:12px;
+margin-bottom:18px;
 }
 
 .stat-box{
 background:#f8fafc;
-padding:12px;
+padding:14px;
 border-radius:10px;
 border:1px solid var(--border);
 }
@@ -167,6 +170,7 @@ border:1px solid var(--border);
 .stat-label{
 font-size:12px;
 color:#6b7280;
+margin-bottom:4px;
 }
 
 .stat-value{
@@ -178,7 +182,7 @@ font-weight:700;
 
 .event-box{
 border:1px solid var(--border);
-padding:10px;
+padding:12px;
 border-radius:10px;
 margin-top:10px;
 background:#fafcff;
@@ -189,6 +193,7 @@ background:#fafcff;
 table{
 width:100%;
 border-collapse:collapse;
+margin-top:12px;
 }
 
 th,
@@ -196,6 +201,11 @@ td{
 padding:10px;
 border-bottom:1px solid var(--border);
 text-align:left;
+font-size:14px;
+}
+
+th{
+background:#f8fafc;
 }
 
 /* STATUS */
