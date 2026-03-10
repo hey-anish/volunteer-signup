@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parent Volunteer Signup</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #1d4ed8;
+      --border: #dbe3ef;
+      --success: #0f9d58;
+      --danger: #d93025;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1, h2, h3 { margin-top: 0; }
+
+    .header {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .subtext {
+      color: rgba(255,255,255,0.9);
+      margin: 8px 0 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: white;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 6px;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 14px;
+      background: white;
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover { background: var(--accent-2); }
+
+    .secondary {
+      background: #eef2ff;
+      color: var(--accent-2);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .stat-box {
+      background: #f8fbff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .event-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 10px;
+    }
+
+    .event-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .event-meta, .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+      font-size: 13px;
+    }
+
+    .status {
+      margin-top: 14px;
+      font-weight: 600;
+    }
+
+    .status.success { color: var(--success); }
+    .status.error { color: var(--danger); }
+
+    .note {
+      background: #fff8e6;
+      border: 1px solid #f4df9a;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Parent Volunteer Signup</h1>
+      <p class="subtext">Parents can volunteer for upcoming events. The dashboard shows how many volunteers and kids are covered so far.</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="signup">Signup Form</button>
+      <button class="tab-btn" data-tab="dashboard">Volunteer Matrix</button>
+    </div>
+
+    <section id="signup" class="tab-panel active">
+      <div class="grid">
+        <div class="card">
+          <h2>Volunteer Registration</h2>
+          <p class="muted">Fill out the form below. Each submission can be stored in a Google Sheet through a Google Apps Script endpoint.</p>
+
+          <form id="volunteerForm">
+            <label for="eventId">Event</label>
+            <select id="eventId" name="eventId" required></select>
+
+            <label for="parentName">Parent Name</label>
+            <input id="parentName" name="parentName" type="text" required />
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required />
+
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" required />
+
+            <label for="kidName">Kid Represented</label>
+            <input id="kidName" name="kidName" type="text" required />
+
+            <label for="volunteerRole">Volunteer Role</label>
+            <select id="volunteerRole" name="volunteerRole" required>
+              <option value="Judge">Judge</option>
+              <option value="Check-in">Check-in</option>
+              <option value="Runner">Runner</option>
+              <option value="Hospitality">Hospitality</option>
+              <option value="General Volunteer">General Volunteer</option>
+            </select>
+
+            <label for="notes">Notes (Optional)</label>
+            <textarea id="notes" name="notes" rows="3" placeholder="Anything we should know?"></textarea>
+
+            <div style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
+              <button type="submit">Submit Volunteer Info</button>
+              <button type="button" class="secondary" id="refreshBtn">Refresh Dashboard</button>
+            </div>
+
+            <div id="formStatus" class="status"></div>
+          </form>
+
+          <div class="note">
+            Replace <strong>APPS_SCRIPT_WEB_APP_URL</strong> in the code with your deployed Google Apps Script URL.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Upcoming Events</h2>
+          <div id="eventsList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="dashboard" class="tab-panel">
+      <div class="card">
+        <h2>Volunteer Matrix</h2>
+        <div class="stats">
+          <div class="stat-box">
+            <div class="stat-label">Total Parent Volunteers</div>
+            <div class="stat-value" id="totalParents">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Total Kids Represented</div>
+            <div class="stat-value" id="totalKids">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Judge Volunteers</div>
+            <div class="stat-value" id="totalJudges">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Events Covered</div>
+            <div class="stat-value" id="eventsCovered">0</div>
+          </div>
+        </div>
+
+        <h3>Event Summary</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Date</th>
+              <th>Parent Volunteers</th>
+              <th>Kids Represented</th>
+              <th>Judges</th>
+            </tr>
+          </thead>
+          <tbody id="summaryTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ==============================
+    // CONFIGURATION
+    // ==============================
+    const APPS_SCRIPT_WEB_APP_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+    // First-cut event list. You can add as many as you want.
+    const EVENTS = [
+      { id: 'event1', name: 'Speech Tournament #1', date: '2026-09-12', location: 'Riverside High School' },
+      { id: 'event2', name: 'Debate Invitational', date: '2026-10-03', location: 'Greenville, SC' },
+      { id: 'event3', name: 'Regional Qualifier', date: '2026-11-14', location: 'Greer, SC' }
+    ];
+
+    // ==============================
+    // UI SETUP
+    // ==============================
+    const eventSelect = document.getElementById('eventId');
+    const eventsList = document.getElementById('eventsList');
+    const form = document.getElementById('volunteerForm');
+    const formStatus = document.getElementById('formStatus');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    const totalParentsEl = document.getElementById('totalParents');
+    const totalKidsEl = document.getElementById('totalKids');
+    const totalJudgesEl = document.getElementById('totalJudges');
+    const eventsCoveredEl = document.getElementById('eventsCovered');
+    const summaryTableBody = document.getElementById('summaryTableBody');
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric'
+      });
+    }
+
+    function loadEvents() {
+      eventSelect.innerHTML = '<option value="">Select an event</option>';
+      eventsList.innerHTML = '';
+
+      EVENTS.forEach(event => {
+        const opt = document.createElement('option');
+        opt.value = event.id;
+        opt.textContent = `${event.name} - ${formatDate(event.date)}`;
+        eventSelect.appendChild(opt);
+
+        const box = document.createElement('div');
+        box.className = 'event-box';
+        box.innerHTML = `
+          <div class="event-title">${event.name}</div>
+          <div class="event-meta">Date: ${formatDate(event.date)}</div>
+          <div class="event-meta">Location: ${event.location}</div>
+        `;
+        eventsList.appendChild(box);
+      });
+    }
+
+    // ==============================
+    // TAB HANDLING
+    // ==============================
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ==============================
+    // FORM SUBMISSION
+    // ==============================
+    async function submitVolunteer(data) {
+      const response = await fetch(APPS_SCRIPT_WEB_APP_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'addVolunteer', ...data })
+      });
+
+      return response.json();
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      formStatus.textContent = 'Submitting...';
+      formStatus.className = 'status';
+
+      const formData = new FormData(form);
+      const selectedEvent = EVENTS.find(e => e.id === formData.get('eventId'));
+
+      const payload = {
+        eventId: formData.get('eventId'),
+        eventName: selectedEvent ? selectedEvent.name : '',
+        eventDate: selectedEvent ? selectedEvent.date : '',
+        parentName: formData.get('parentName'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        kidName: formData.get('kidName'),
+        volunteerRole: formData.get('volunteerRole'),
+        notes: formData.get('notes') || ''
+      };
+
+      try {
+        if (APPS_SCRIPT_WEB_APP_URL.includes('PASTE_YOUR')) {
+          throw new Error('Apps Script URL not configured yet.');
+        }
+
+        const result = await submitVolunteer(payload);
+
+        if (result.success) {
+          formStatus.textContent = 'Volunteer signup submitted successfully.';
+          formStatus.className = 'status success';
+          form.reset();
+          loadDashboard();
+        } else {
+          throw new Error(result.message || 'Submission failed.');
+        }
+      } catch (err) {
+        formStatus.textContent = err.message;
+        formStatus.className = 'status error';
+      }
+    });
+
+    // ==============================
+    // DASHBOARD / SUMMARY
+    // ==============================
+    async function fetchSummary() {
+      const url = `${APPS_SCRIPT_WEB_APP_URL}?action=getSummary`;
+      const response = await fetch(url);
+      return response.json();
+    }
+
+    function renderSummary(summary) {
+      totalParentsEl.textContent = summary.totalParents || 0;
+      totalKidsEl.textContent = summary.totalKids || 0;
+      totalJudgesEl.textContent = summary.totalJudges || 0;
+      eventsCoveredEl.textContent = summary.eventsCovered || 0;
+
+      summaryTableBody.innerHTML = '';
+
+      (summary.events || []).forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.eventName}</td>
+          <td>${formatDate(item.eventDate)}</td>
+          <td>${item.parentCount}</td>
+          <td>${item.kidCount}</td>
+          <td>${item.judgeCount}</td>
+        `;
+        summaryTableBody.appendChild(tr);
+      });
+    }
+
+    async function loadDashboard() {
+      try {
+        if (APPS_SCRIPT_WEB_APP_URL.includes('PASTE_YOUR')) {
+          // Local demo data until backend is connected.
+          renderSummary({
+            totalParents: 0,
+            totalKids: 0,
+            totalJudges: 0,
+            eventsCovered: 0,
+            events: EVENTS.map(e => ({
+              eventName: e.name,
+              eventDate: e.date,
+              parentCount: 0,
+              kidCount: 0,
+              judgeCount: 0
+            }))
+          });
+          return;
+        }
+
+        const summary = await fetchSummary();
+        renderSummary(summary);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    refreshBtn.addEventListener('click', loadDashboard);
+
+    loadEvents();
+    loadDashboard();
+  </script>
+</body>
+</html>
