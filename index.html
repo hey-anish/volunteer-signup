@@ -17,7 +17,9 @@
       --danger: #d93025;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -32,7 +34,9 @@
       padding: 24px;
     }
 
-    h1, h2, h3 { margin-top: 0; }
+    h1, h2, h3 {
+      margin-top: 0;
+    }
 
     .header {
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -43,8 +47,9 @@
     }
 
     .subtext {
-      color: rgba(255,255,255,0.9);
+      color: rgba(255,255,255,0.92);
       margin: 8px 0 0;
+      font-size: 16px;
     }
 
     .tabs {
@@ -69,8 +74,13 @@
       border-color: var(--accent);
     }
 
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
 
     .grid {
       display: grid;
@@ -90,6 +100,10 @@
       display: block;
       margin: 14px 0 6px;
       font-weight: 600;
+    }
+
+    .required-star {
+      color: var(--danger);
     }
 
     input, select, textarea {
@@ -112,7 +126,9 @@
       cursor: pointer;
     }
 
-    button:hover { background: var(--accent-2); }
+    button:hover {
+      background: var(--accent-2);
+    }
 
     .secondary {
       background: #eef2ff;
@@ -151,6 +167,7 @@
       border-radius: 12px;
       padding: 14px;
       margin-top: 10px;
+      background: #fafcff;
     }
 
     .event-title {
@@ -158,7 +175,8 @@
       margin-bottom: 6px;
     }
 
-    .event-meta, .muted {
+    .event-meta,
+    .muted {
       color: var(--muted);
       font-size: 14px;
     }
@@ -187,16 +205,33 @@
       font-weight: 600;
     }
 
-    .status.success { color: var(--success); }
-    .status.error { color: var(--danger); }
+    .status.success {
+      color: var(--success);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .empty-message {
+      color: var(--muted);
+      padding: 10px 0;
+    }
 
     @media (max-width: 900px) {
-      .grid { grid-template-columns: 1fr; }
-      .stats { grid-template-columns: 1fr 1fr; }
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
     }
 
     @media (max-width: 600px) {
-      .stats { grid-template-columns: 1fr; }
+      .stats {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -218,27 +253,25 @@
       <div class="grid">
         <div class="card">
           <h2>Volunteer Registration</h2>
-          <p class="muted">
-            Fill out the form below to volunteer for an event.
-          </p>
+          <p class="muted">Fill out the form below to volunteer for an event.</p>
 
           <form id="volunteerForm">
-            <label for="eventId">Event</label>
+            <label for="eventId">Event <span class="required-star">*</span></label>
             <select id="eventId" name="eventId" required>
               <option value="">Loading events...</option>
             </select>
 
-            <label for="parentName">Parent Name</label>
+            <label for="parentName">Parent Name <span class="required-star">*</span></label>
             <input id="parentName" name="parentName" type="text" required />
 
-            <label for="email">Email</label>
+            <label for="email">Email <span class="required-star">*</span></label>
             <input id="email" name="email" type="email" required />
 
-            <label for="phone">Phone</label>
+            <label for="phone">Phone <span class="required-star">*</span></label>
             <input id="phone" name="phone" type="tel" required />
 
             <label for="kidName">Kid Represented</label>
-            <input id="kidName" name="kidName" type="text" required />
+            <input id="kidName" name="kidName" type="text" />
 
             <label for="volunteerRole">Volunteer Role</label>
             <select id="volunteerRole" name="volunteerRole" required>
@@ -340,17 +373,25 @@
         });
       }
 
-      return dateStr;
+      return String(dateStr);
     }
 
     function loadEvents() {
       eventSelect.innerHTML = '<option value="">Select an event</option>';
       eventsList.innerHTML = '';
 
+      if (!EVENTS.length) {
+        eventsList.innerHTML = '<div class="empty-message">No upcoming events found.</div>';
+        return;
+      }
+
       EVENTS.forEach(event => {
         const opt = document.createElement('option');
         opt.value = String(event.id);
         opt.textContent = `${event.name} - ${formatDate(event.date)}`;
+        opt.dataset.eventName = event.name || '';
+        opt.dataset.eventDate = event.date || '';
+        opt.dataset.location = event.location || '';
         eventSelect.appendChild(opt);
 
         const box = document.createElement('div');
@@ -401,9 +442,9 @@
 
         EVENTS = (result.events || []).map(ev => ({
           id: String(ev.id),
-          name: ev.name,
-          date: ev.date,
-          location: ev.location
+          name: ev.name || '',
+          date: ev.date || '',
+          location: ev.location || ''
         }));
 
         loadEvents();
@@ -430,7 +471,17 @@
 
       summaryTableBody.innerHTML = '';
 
-      (summary.events || []).forEach(item => {
+      const rows = summary.events || [];
+      if (!rows.length) {
+        summaryTableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-message">No volunteer data yet.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      rows.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${item.eventName || ''}</td>
@@ -468,19 +519,27 @@
       formStatus.className = 'status';
 
       const formData = new FormData(form);
-      const selectedEvent = EVENTS.find(ev => String(ev.id) === String(formData.get('eventId')));
+      const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+      const selectedEventName = selectedOption ? (selectedOption.dataset.eventName || '') : '';
+      const selectedEventDate = selectedOption ? (selectedOption.dataset.eventDate || '') : '';
 
       const payload = {
         eventId: formData.get('eventId'),
-        eventName: selectedEvent ? selectedEvent.name : '',
-        eventDate: selectedEvent ? selectedEvent.date : '',
-        parentName: formData.get('parentName'),
-        email: formData.get('email'),
-        phone: formData.get('phone'),
-        kidName: formData.get('kidName'),
+        eventName: selectedEventName,
+        eventDate: selectedEventDate,
+        parentName: (formData.get('parentName') || '').trim(),
+        email: (formData.get('email') || '').trim(),
+        phone: (formData.get('phone') || '').trim(),
+        kidName: (formData.get('kidName') || '').trim(),
         volunteerRole: formData.get('volunteerRole'),
         notes: formData.get('notes') || ''
       };
+
+      if (!payload.eventId || !payload.parentName || !payload.email || !payload.phone) {
+        formStatus.textContent = 'Please fill all required fields.';
+        formStatus.className = 'status error';
+        return;
+      }
 
       try {
         const result = await submitVolunteer(payload);
