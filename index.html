@@ -315,17 +315,10 @@
   </div>
 
   <script>
-    // ==============================
-    // CONFIGURATION
-    // ==============================
     const APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbySloUz-3sB_v2ijolC7UIYWJ9UzzzhNsKg2cAWGTfcG_LztdY_bqMmqnBRUVzmVWierg/exec';
 
-    // First-cut event list. You can add as many as you want.
     let EVENTS = [];
 
-    // ==============================
-    // UI SETUP
-    // ==============================
     const eventSelect = document.getElementById('eventId');
     const eventsList = document.getElementById('eventsList');
     const form = document.getElementById('volunteerForm');
@@ -339,9 +332,13 @@
     const summaryTableBody = document.getElementById('summaryTableBody');
 
     function formatDate(dateStr) {
-      const d = new Date(dateStr + 'T00:00:00');
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
       return d.toLocaleDateString('en-US', {
-        year: 'numeric', month: 'short', day: 'numeric'
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
       });
     }
 
@@ -366,130 +363,39 @@
       });
     }
 
-    async function loadEventsFromBackend() {
-  try {
-    if (APPS_SCRIPT_WEB_APP_URL.includes('PASTE_YOUR')) {
-      EVENTS = [
-        { id: 'event1', name: 'Speech Tournament #1', date: '2026-09-12', location: 'Riverside High School' },
-        { id: 'event2', name: 'Debate Invitational', date: '2026-10-03', location: 'Greenville, SC' },
-        { id: 'event3', name: 'Regional Qualifier', date: '2026-11-14', location: 'Greer, SC' }
-      ];
-      loadEvents();
-      return;
-    }
-
-    const result = await fetchEvents();
-    console.log("Events API result:", result);
-
-    if (!result.success) {
-      throw new Error(result.message || "Could not load events.");
-    }
-
-    EVENTS = result.events || [];
-    loadEvents();
-
-    if (EVENTS.length === 0) {
-      alert("Events loaded, but no rows were found in the Events sheet.");
-    }
-  } catch (err) {
-    console.error("Error loading events:", err);
-    alert("Error loading events: " + err.message);
-  }
-}
-    } - ${formatDate(event.date)}`;
-        eventSelect.appendChild(opt);
-
-        const box = document.createElement('div');
-        box.className = 'event-box';
-        box.innerHTML = `
-          <div class="event-title">${event.name}</div>
-          <div class="event-meta">Date: ${formatDate(event.date)}</div>
-          <div class="event-meta">Location: ${event.location}</div>
-        `;
-        eventsList.appendChild(box);
-      });
-    }
-
-    // ==============================
-    // TAB HANDLING
-    // ==============================
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(btn.dataset.tab).classList.add('active');
-      });
-    });
-
-    // ==============================
-    // FORM SUBMISSION
-    // ==============================
-    async function submitVolunteer(data) {
-      const response = await fetch(APPS_SCRIPT_WEB_APP_URL, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'addVolunteer', ...data })
-      });
-
+    async function fetchEvents() {
+      const url = `${APPS_SCRIPT_WEB_APP_URL}?action=getEvents`;
+      const response = await fetch(url);
       return response.json();
     }
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      formStatus.textContent = 'Submitting...';
-      formStatus.className = 'status';
-
-      const formData = new FormData(form);
-      const selectedEvent = EVENTS.find(e => e.id === formData.get('eventId'));
-
-      const payload = {
-        eventId: formData.get('eventId'),
-        eventName: selectedEvent ? selectedEvent.name : '',
-        eventDate: selectedEvent ? selectedEvent.date : '',
-        parentName: formData.get('parentName'),
-        email: formData.get('email'),
-        phone: formData.get('phone'),
-        kidName: formData.get('kidName'),
-        volunteerRole: formData.get('volunteerRole'),
-        notes: formData.get('notes') || ''
-      };
-
-      try {
-        if (APPS_SCRIPT_WEB_APP_URL.includes('PASTE_YOUR')) {
-          throw new Error('Apps Script URL not configured yet.');
-        }
-
-        const result = await submitVolunteer(payload);
-
-        if (result.success) {
-          formStatus.textContent = 'Volunteer signup submitted successfully.';
-          formStatus.className = 'status success';
-          form.reset();
-          loadDashboard();
-        } else {
-          throw new Error(result.message || 'Submission failed.');
-        }
-      } catch (err) {
-        formStatus.textContent = err.message;
-        formStatus.className = 'status error';
-      }
-    });
-
-    // ==============================
-    // DASHBOARD / SUMMARY
-    // ==============================
     async function fetchSummary() {
       const url = `${APPS_SCRIPT_WEB_APP_URL}?action=getSummary`;
       const response = await fetch(url);
       return response.json();
     }
 
-    async function fetchEvents() {
-      const url = `${APPS_SCRIPT_WEB_APP_URL}?action=getEvents`;
-      const response = await fetch(url);
-      return response.json();
+    async function loadEventsFromBackend() {
+      try {
+        const result = await fetchEvents();
+        console.log('Events API result:', result);
+
+        if (!result.success) {
+          throw new Error(result.message || 'Could not load events.');
+        }
+
+        EVENTS = result.events || [];
+        loadEvents();
+
+        if (EVENTS.length === 0) {
+          formStatus.textContent = 'No rows found in the Events sheet.';
+          formStatus.className = 'status error';
+        }
+      } catch (err) {
+        console.error('Error loading events:', err);
+        formStatus.textContent = 'Error loading events: ' + err.message;
+        formStatus.className = 'status error';
+      }
     }
 
     function renderSummary(summary) {
@@ -515,30 +421,70 @@
 
     async function loadDashboard() {
       try {
-        if (APPS_SCRIPT_WEB_APP_URL.includes('PASTE_YOUR')) {
-          // Local demo data until backend is connected.
-          renderSummary({
-            totalParents: 0,
-            totalKids: 0,
-            totalJudges: 0,
-            eventsCovered: 0,
-            events: EVENTS.map(e => ({
-              eventName: e.name,
-              eventDate: e.date,
-              parentCount: 0,
-              kidCount: 0,
-              judgeCount: 0
-            }))
-          });
-          return;
-        }
-
         const summary = await fetchSummary();
         renderSummary(summary);
       } catch (err) {
-        console.error(err);
+        console.error('Dashboard load error:', err);
       }
     }
+
+    async function submitVolunteer(data) {
+      const response = await fetch(APPS_SCRIPT_WEB_APP_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(data)
+      });
+
+      return response.json();
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      formStatus.textContent = 'Submitting...';
+      formStatus.className = 'status';
+
+      const formData = new FormData(form);
+      const selectedEvent = EVENTS.find(ev => ev.id === formData.get('eventId'));
+
+      const payload = {
+        eventId: formData.get('eventId'),
+        eventName: selectedEvent ? selectedEvent.name : '',
+        eventDate: selectedEvent ? selectedEvent.date : '',
+        parentName: formData.get('parentName'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        kidName: formData.get('kidName'),
+        volunteerRole: formData.get('volunteerRole'),
+        notes: formData.get('notes') || ''
+      };
+
+      try {
+        const result = await submitVolunteer(payload);
+
+        if (result.success) {
+          formStatus.textContent = 'Volunteer signup submitted successfully.';
+          formStatus.className = 'status success';
+          form.reset();
+          loadDashboard();
+        } else {
+          throw new Error(result.message || 'Submission failed.');
+        }
+      } catch (err) {
+        console.error('Submit error:', err);
+        formStatus.textContent = err.message;
+        formStatus.className = 'status error';
+      }
+    });
 
     refreshBtn.addEventListener('click', loadDashboard);
 
